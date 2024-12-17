@@ -35,6 +35,6 @@ int main(int argc,char *argv[])
   
 
   printf("\n--------- End -----------\n");
-  printf("Testing out dgbmv()....\n");
-  cblas_dgbmv(CBLAS_LAYOUT layout, CBLAS_TRANSPOSE TransA, const int M, const int N, const int KL, const int KU, const double alpha, const double *A, const int lda, const double *X, const int incX, const double beta, double *Y, const int incY)
+  printf("\n\n");
+
 }

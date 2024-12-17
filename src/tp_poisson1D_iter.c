@@ -3,7 +3,9 @@
 /* This file contains the main function   */
 /* to solve the Poisson 1D problem        */
 /******************************************/
-#include "lib_poisson1D.h"
+#include "../include/lib_poisson1D.h"
+#include "lib_poisson1D_writers.c"//
+#include "lib_poisson1D_richardson.c"
 
 #define ALPHA 0
 #define JAC 1

@@ -44,7 +44,7 @@ Elle implémente la factorisation LU et peut donc résoudre des systèmes linéa
 
 ## 6. Que fait la fonction dgbtrs ? Quelle méthode implémente t-elle ?
 La fonction dgbtrs résout un système linéaire avec une matrice stockée sous forme de bandes en utilisant
-le résulatat de la factorisation LU efefctué par dgbtrf. Elle implémente la méthode de substitution arrière
+le résulatat de la factorisation LU effectué par dgbtrf. Elle implémente la méthode de substitution arrière
 après la factorisation LU.
 
 ## 7. Que fait la fonction dgbsv ? Quelle méthode implémente t-elle ?
