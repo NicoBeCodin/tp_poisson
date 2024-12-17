@@ -90,6 +90,12 @@ int main(int argc,char *argv[])
   if (IMPLEM == TRF) {
     //utilisation de la factorisation LU avec LAPCK
     dgbtrf_(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
+    if (info!=0){
+      printf("problem with dgbtrf_ ...\n");
+
+    } else{
+      printf("Correct execution of dgbtrf_\n");
+    }
   }
   
   /* LU for tridiagonal matrix  (can replace dgbtrf_) */
