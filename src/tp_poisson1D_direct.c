@@ -86,12 +86,15 @@ int main(int argc,char *argv[])
   printf("Solution with LAPACK\n");
   ipiv = (int *) calloc(la, sizeof(int));
 
+  clock_t start, end;
   /* LU Factorization */
   if (IMPLEM == TRF) {
     //utilisation de la factorisation LU avec LAPCK
+    start =clock();
     dgbtrf_(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
+    double end = clock();
     if (info!=0){
-      printf("problem with dgbtrf_ ...\n");
+      printf("info DG ...\n");
 
     } else{
       printf("Correct execution of dgbtrf_\n");
@@ -107,6 +110,8 @@ int main(int argc,char *argv[])
     /* Solution (Triangular) */
     if (info==0){
       dgbtrs_("N", &la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
+      end = clock();
+      printf("Time for execution with dgbtrs_: %lf \n", (double)(end-start));
       if (info!=0){printf("\n INFO DGBTRS = %d\n",info);} else{
         printf("dgbtrs_ solving succesful!\n");
       }
@@ -117,13 +122,15 @@ int main(int argc,char *argv[])
 
   /* It can also be solved with dgbsv */
   if (IMPLEM == SV) {
+    start = clock();
     int ldb = 2* kl +ku +1;
     int *ipiv_sv = (int* )malloc(sizeof(int)*la);
     double *AB_sv = (double*)malloc(sizeof(double)*ldb*la);
     memcpy(AB_sv, AB,sizeof(double)*ldb*la); 
 
     dgbsv_(&la, &kl, &ku, &NRHS, AB_sv, &ldb, ipiv_sv, RHS, &la, &info);
-
+    end = clock();
+    printf("Time for execution with dgbsv: %lf \n", (double)(end-start));
     if (info==0){
       printf("dgbsv succesful!\n");
     }else{
