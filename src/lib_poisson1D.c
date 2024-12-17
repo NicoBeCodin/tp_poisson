@@ -5,7 +5,27 @@
 /**********************************************/
 #include "lib_poisson1D.h"
 
+//Stockage GB en priorité colonne pour la mtrice de poisson 1D
 void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv){
+  int i, j,k;
+  for(j=0;j<(*la); j++){
+    k = j * (*lab);
+    if (*kv >=0){
+      for (i=0; i<*kv; i++){
+        AB[k+i] = 0.0;
+      }
+      
+    }
+    AB[k+*kv] = -1.0;
+    AB[k+*kv + 1] = 2.0;
+    AB[k+*kv + 2] = -1.0;
+    }
+  AB[0]=0.0;
+  if (*kv == 1){
+    AB[1] = 0;
+  }
+  AB[(*lab)* (*la) - 1] =0.0;
+  
 }
 
 void set_GB_operator_colMajor_poisson1D_Id(double* AB, int *lab, int *la, int *kv){

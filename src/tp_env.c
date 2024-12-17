@@ -4,6 +4,7 @@
 /* test the environment of compilation    */
 /******************************************/
 #include "tp_env.h"
+#include <cblas.h>
 int main(int argc,char *argv[])
 /* ** argc: Nombre d'arguments */
 /* ** argv: Valeur des arguments */
@@ -29,7 +30,11 @@ int main(int argc,char *argv[])
   cblas_dcopy(5,x,1,y,1);
   for (ii=0;ii<5;ii++){
     printf("y[%d] = %lf\n",ii,y[ii]);
+
   }
+  
 
   printf("\n--------- End -----------\n");
+  printf("Testing out dgbmv()....\n");
+  cblas_dgbmv(CBLAS_LAYOUT layout, CBLAS_TRANSPOSE TransA, const int M, const int N, const int KL, const int KU, const double alpha, const double *A, const int lda, const double *X, const int incX, const double beta, double *Y, const int incY)
 }
