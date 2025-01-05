@@ -44,13 +44,15 @@ OBJTP2ITER= lib_poisson1D.o tp_poisson1D_iter.o
 OBJTP2DIRECT= lib_poisson1D.o tp_poisson1D_direct.o
 #
 
-all: bin/tp_testenv bin/tpPoisson1D_direct bin/tpPoisson1D_iter 
+all: bin/tp_testenv bin/tpPoisson1D_direct bin/tpPoisson1D_iter bin/csr_csc
 
 testenv: bin/tp_testenv
 
 tpPoisson1D_iter: bin/tpPoisson1D_iter
 
 tpPoisson1D_direct: bin/tpPoisson1D_direct
+
+csr_csc: bin/csr_csc
 
 tp_env.o: $(TPDIRSRC)/tp_env.c
 	$(CC) $(OPTC) -c $(INCL) $(TPDIRSRC)/tp_env.c 
@@ -64,6 +66,9 @@ tp_poisson1D_iter.o: $(TPDIRSRC)/tp_poisson1D_iter.c
 tp_poisson1D_direct.o: $(TPDIRSRC)/tp_poisson1D_direct.c
 	$(CC) $(OPTC) -c $(INCL) $(TPDIRSRC)/tp_poisson1D_direct.c  
 
+csr_csc.o: $(TPDIRSRC)/csr_csc.c
+	$(CC) $(OPTC) -c $(INCL) $(TPDIRSRC)/csr_csc.c
+
 bin/tp_testenv: $(OBJENV) 
 	$(CC) -o bin/tp_testenv $(OPTC) $(OBJENV) $(LIBS)
 
@@ -73,11 +78,14 @@ bin/tpPoisson1D_iter: $(OBJTP2ITER)
 bin/tpPoisson1D_direct: $(OBJTP2DIRECT)
 	$(CC) -o bin/tpPoisson1D_direct $(OPTC) $(OBJTP2DIRECT) $(LIBS)
 
+bin/csr_csc: $(OBJENV)
+	$(CC) -o bin/csr_csc $(OPTC) $(OBJTP2DIRECT) $(LIBS)
+	
 run_testenv:
 	bin/tp_testenv
 
 run_tpPoisson1D_iter:
-	bin/tpPoisson1D_iter
+	bin/tpPoisson1D_iter $(ARGS)
 
 run_tpPoisson1D_direct:
 	bin/tpPoisson1D_direct

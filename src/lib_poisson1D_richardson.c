@@ -85,7 +85,7 @@ void richardson_MB(double *AB, double *RHS, double *X, double *MB, int *lab, int
       X[i+1] = (1- MB[i+1]) * oldX +MB[i+1]* tmp2/ divisor;
       double new_residual= X[i+1] - oldX;
       residual +=new_residual * new_residual;
-      residual_norm+= oldX*oldX
+      residual_norm+= oldX*oldX;
 
     }
     }

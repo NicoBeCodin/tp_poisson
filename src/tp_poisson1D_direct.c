@@ -4,7 +4,7 @@
 /* to solve the Poisson 1D problem        */
 /******************************************/
 #include "../include/lib_poisson1D.h"
-#include "atlas_headers.h"
+#include "../include/atlas_headers.h"
 
 
 #include "lib_poisson1D_writers.c" //This is temporary, I need to try out my functions
@@ -100,6 +100,8 @@ int main(int argc,char *argv[])
       printf("Correct execution of dgbtrf_\n");
     }
   }
+
+
   
   /* LU for tridiagonal matrix  (can replace dgbtrf_) */
   if (IMPLEM == TRI) {
@@ -111,7 +113,7 @@ int main(int argc,char *argv[])
     if (info==0){
       dgbtrs_("N", &la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
       end = clock();
-      printf("Time for execution with dgbtrs_: %lf \n", (double)(end-start));
+      printf("Time for execution with dgbtrs_ in cpu ticks: %lf \n", (double)(end-start));
       if (info!=0){printf("\n INFO DGBTRS = %d\n",info);} else{
         printf("dgbtrs_ solving succesful!\n");
       }
@@ -130,7 +132,7 @@ int main(int argc,char *argv[])
 
     dgbsv_(&la, &kl, &ku, &NRHS, AB_sv, &ldb, ipiv_sv, RHS, &la, &info);
     end = clock();
-    printf("Time for execution with dgbsv: %lf \n", (double)(end-start));
+    printf("Time for execution with dgbsv in cpu ticks: %lf \n", (double)(end-start));
     if (info==0){
       printf("dgbsv succesful!\n");
     }else{

@@ -4,8 +4,10 @@
 /* to solve the Poisson 1D problem        */
 /******************************************/
 #include "../include/lib_poisson1D.h"
-#include "lib_poisson1D_writers.c"//
+#include "lib_poisson1D_writers.c"
 #include "lib_poisson1D_richardson.c"
+#include <time.h>
+
 
 #define ALPHA 0
 #define JAC 1
@@ -34,10 +36,13 @@ int main(int argc,char *argv[])
 
   if (argc == 2) {
     IMPLEM = atoi(argv[1]);
+    printf("IMPLEM = %d\n", IMPLEM);
   } else if (argc > 2) {
     perror("Application takes at most one argument");
     exit(1);
   }
+
+  
 
   /* Size of the problem */
   NRHS=1;
@@ -80,7 +85,7 @@ int main(int argc,char *argv[])
 
   /* Computation of optimum alpha */
   opt_alpha = richardson_alpha_opt(&la);
-  printf("Optimal alpha for simple Richardson iteration is : %lf",opt_alpha); 
+  printf("Optimal alpha for simple Richardson iteration is : %lf\n",opt_alpha); 
 
   /* Solve */
   double tol=1e-3;
@@ -89,10 +94,16 @@ int main(int argc,char *argv[])
   int nbite=0;
 
   resvec=(double *) calloc(maxit, sizeof(double));
+  clock_t start, end;
+  
 
   /* Solve with Richardson alpha */
   if (IMPLEM == ALPHA) {
+    start =clock();
     richardson_alpha(AB, RHS, SOL, &opt_alpha, &lab, &la, &ku, &kl, &tol, &maxit, resvec, &nbite);
+    end =clock();
+    printf("Time for execution for richardson alpha in cpu ticks: %lf\n", (double)(end-start));
+
   }
 
   /* Richardson General Tridiag */
@@ -111,7 +122,10 @@ int main(int argc,char *argv[])
   /* Solve with General Richardson */
   if (IMPLEM == JAC || IMPLEM == GS) {
     write_GB_operator_colMajor_poisson1D(MB, &lab, &la, "MB.dat");
+    start =clock();
     richardson_MB(AB, RHS, SOL, MB, &lab, &la, &ku, &kl, &tol, &maxit, resvec, &nbite);
+    end =clock();
+    printf("Time for jacobi method in cpu ticks: %lf", (double)(end-start));
   }
 
   /* Write solution */

@@ -58,3 +58,52 @@ On peut utiliser la fonction dnrm2 pour calculer la norme euclidienne d'un vecte
 effectué une opération matrice-vecteur avec dgbmv et obtenu la solution du système linéaire.
 
 
+
+
+
+
+
+### Complexité algorithmique, en espace, et qualité numérique
+
+| **Fonction**                        | **Complexité temporelle** | **Complexité en espace** | **Qualité numérique** | **Commentaire**                                                                                           |
+|-------------------------------------|---------------------------|---------------------------|------------------------|-----------------------------------------------------------------------------------------------------------|
+| `set_GB_operator_colMajor_poisson1D` | \( O(la) \)               | \( O(la \cdot kv) \)      | Bonne                 | Allocation pour stocker une matrice en bande (\( kv \) dépend de la largeur de bande, souvent constante). |
+| `set_GB_operator_colMajor_poisson1D_Id` | \( O(la) \)            | \( O(la \cdot kv) \)      | Bonne                 | Similaire à la fonction précédente, qualité numérique robuste car il n'y a pas de calcul sensible.        |
+| `set_dense_RHS_DBC_1D`              | \( O(la) \)               | \( O(la) \)               | Bonne                 | Gère les conditions aux bords avec des initialisations simples, donc stable.                             |
+| `set_analytical_solution_DBC_1D`    | \( O(la) \)               | \( O(la) \)               | Bonne                 | Stable, mais dépend de la précision des valeurs initiales pour les conditions aux bords.                  |
+| `set_grid_points_1D`                | \( O(la) \)               | \( O(la) \)               | Bonne                 | Crée une grille uniforme, très stable numériquement.                                                      |
+| `relative_forward_error`            | \( O(la) \)               | \( O(1) \)                | Dépendante            | Calcul des erreurs sensibles aux petites perturbations dans les données, dépend de la précision des données. |
+| `indexABCol`                        | \( O(1) \)                | \( O(1) \)                | Bonne                 | Simple calcul d'indice, insensible aux erreurs numériques.                                                 |
+| `dgbtrftridiag`                     | \( O(1) \)                | \( O(1) \)                | N/A                   | Fonction placeholder sans calcul réel.                                                                    |
+| `eig_poisson1D`                     | \( O(1) \)                | \( O(1) \)                | Bonne                 | Calcule un scalaire en combinant des fonctions stables.                                                   |
+| `eigmax_poisson1D`                  | \( O(1) \)                | \( O(1) \)                | Bonne                 | Qualité robuste car les calculs sont basés sur des opérations mathématiques simples.                       |
+| `eigmin_poisson1D`                  | \( O(1) \)                | \( O(1) \)                | Bonne                 | Idem que pour `eigmax_poisson1D`.                                                                         |
+| `richardson_alpha_opt`              | \( O(1) \)                | \( O(1) \)                | Bonne                 | Aucun problème de stabilité vu la simplicité des calculs.                                                 |
+| `richardson_alpha`                  | \( O(k \cdot la) \)       | \( O(la) \)               | Moyenne à Bonne       | Qualité dépendante du choix de \( \alpha \) et de la convergence des itérations.                          |
+| `richardson_MB`                     | \( O(k \cdot la) \)       | \( O(la) \)               | Moyenne à Bonne       | Sensible aux erreurs d'approximation dues à la matrice de bande modifiée.                                  |
+| `extract_MB_jacobi_tridiag`         | \( O(la) \)               | \( O(la) \)               | Bonne                 | Robuste car il s'agit d'une extraction directe sans calcul complexe.                                       |
+| `extract_MB_gauss_seidel`           | \( O(la) \)               | \( O(la) \)               | Bonne                 | Idem que pour `extract_MB_jacobi_tridiag`, très stable.                                                   |
+| `set_CSR_poisson1D`                 | \( O(N) \)                | \( O(3N - 2) \)           | Bonne                 | Génération efficace d'une matrice creuse au format CSR, sans risque significatif d'erreurs numériques.     |
+| `set_CSC_poisson1D`                 | \( O(N) \)                | \( O(3N - 2) \)           | Bonne                 | Génération efficace d'une matrice creuse au format CSC, également stable numériquement.                   |
+| `dcsrmv`                            | \( O(N) \)                | \( O(N) \)                | Bonne                 | Produit matrice-vecteur au format CSR, stable numériquement grâce à des opérations simples.                |
+| `dcscmv`                            | \( O(N) \)                | \( O(N) \)                | Bonne                 | Produit matrice-vecteur au format CSC, stable numériquement et efficace pour les matrices creuses.         |
+
+---
+
+### Justifications des choix
+
+1. **Complexité temporelle**:
+   - Les fonctions qui parcourent une grille ou une matrice ont \( O(la) \).
+   - Les fonctions de calcul élémentaire (comme des opérations scalaires) ont \( O(1) \).
+   - Les fonctions itératives dépendent du nombre d'itérations \( k \), d'où \( O(k \cdot la) \).
+   - `dcsrmv` et `dcscmv` réalisent des produits matrice-vecteur, chaque entrée non nulle de la matrice étant multipliée et accumulée, d'où \( O(N) \).
+
+2. **Complexité en espace**:
+   - Les fonctions allouant de la mémoire pour des matrices (par exemple, stockées en bande ou dense) ont une complexité \( O(la) \) ou \( O(la \cdot kv) \).
+   - Les fonctions qui n'allouent pas de grandes structures (comme `indexABCol`) ont \( O(1) \).
+   - Les formats CSR et CSC stockent uniquement les valeurs non nulles (\( 3N - 2 \) pour une matrice de Poisson 1D), avec des indices supplémentaires.
+
+3. **Qualité numérique**:
+   - Les fonctions de configuration de matrices ou vecteurs (e.g., `set_` fonctions) sont stables, car elles manipulent des données déterministes.
+   - Les calculs itératifs (comme `richardson_alpha`) sont sensibles aux erreurs d'arrondi et aux mauvais choix de paramètres (\( \alpha \)).
+   - Les erreurs relatives (`relative_forward_error`) dépendent de la précision des données et de l'échelle des erreurs, donc leur qualité peut varier.
