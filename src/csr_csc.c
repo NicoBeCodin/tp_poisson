@@ -1,4 +1,5 @@
-#include <stdlib.h>
+#include "../include/csr_csc.h"
+
 
 void set_CSR_poisson1D(int N, double **values, int **col_indices,
                        int **row_ptr) {

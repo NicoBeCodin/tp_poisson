@@ -91,3 +91,142 @@ int indexABCol(int i, int j, int *lab){
 int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info){
   return *info;
 }
+
+void eig_poisson1D(double* eigval, int *la){
+  *eigval = 2.0/(eigmin_poisson1D(la) + eigmax_poisson1D(la));
+
+}
+
+double eigmax_poisson1D(int *la){
+  return -2.0*cos((*la)*M_PI/(*la+1)) +2.0;
+}
+
+double eigmin_poisson1D(int *la){
+  return -2.0*cos(M_PI/(*la+1)) +2.0;
+}
+
+double richardson_alpha_opt(int *la){
+  return 2.0/(eigmin_poisson1D(la) + eigmax_poisson1D(la));
+}
+
+// void richardson_alpha(double *AB, double *RHS, double *X, double *alpha_rich, int *lab, int *la,int *ku, int*kl, double *tol, int *maxit, double *resvec, int *nbite){
+//   double* V = (double*)calloc(*la, sizeof(double));
+//   const double normb = (1/cblas_dnrm2(*la, RHS, 1));
+
+//   //Copie du vecteur V
+//   cblas_dcopy(*la, RHS, 1.0, V, 1.0);
+//   cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, -1.0, AB, *lab, X, 1.0, 1.0,V,1.0);
+//   //residu
+
+//   double residu = cblas_dnrm2(*la, V,1)/ normb;
+//   resvec[*nbite] = residu;
+
+//   while (residu> *tol && *maxit > *nbite){
+//     cblas_daxpy(*la, *alpha_rich, V, 1.0,X,1.0);
+//     //residu
+//     cblas_dcopy(*la, RHS, 1.0, V, 1.0);
+//     cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, -1.0, AB, *lab, X, 1.0, 1.0, V, 1.0);
+
+//     resvec[*nbite] =residu;
+//     residu = cblas_dnrm2(*la, V, 1)* normb;
+//     ++*nbite;
+//   }
+//   free(V);
+
+// }
+
+void richardson_alpha(double *AB, double *RHS, double *X, double *alpha_rich,
+                      int *lab, int *la, int *ku, int *kl, double *tol,
+                      int *maxit, double *resvec, int *nbite) {
+    /*
+    Richardson method with optimal alpha:
+      r^0 = b - Ax^0
+      while ||r^k+1|| > epsilon do:
+        x^k+1 = x^k + alpha(b - Ax^k)
+    */
+
+    // Allocate memory for residual vector
+    double *b = (double *)calloc(*la, sizeof(double));
+    double norm_b = cblas_dnrm2(*la, RHS, 1); // Compute ||b||_2
+
+    // Compute the initial residual: r^0 = b - Ax^0
+    memcpy(b, RHS, *la * sizeof(double));
+    cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, -1.0, AB, *lab, X, 1, 1.0, b, 1);
+
+    // Compute the initial residual norm and store it in resvec
+    resvec[0] = cblas_dnrm2(*la, b, 1) / norm_b;
+
+    // Iterative loop
+    while (resvec[*nbite] > *tol && *nbite < *maxit) {
+        // Update the solution: x^k+1 = x^k + alpha * r^k
+        cblas_daxpy(*la, *alpha_rich, b, 1, X, 1);
+
+        // Compute the next residual: r^k+1 = b - Ax^k+1
+        memcpy(b, RHS, *la * sizeof(double));
+        cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, -1.0, AB, *lab, X, 1, 1.0, b, 1);
+
+        // Compute the residual norm and store it in resvec
+        (*nbite)++;
+        resvec[*nbite] = cblas_dnrm2(*la, b, 1) / norm_b;
+    }
+
+    // Free allocated memory
+    free(b);
+}
+
+
+void extract_MB_jacobi_tridiag(double *AB, double *MB, int *lab, int *la,int *ku, int*kl, int *kv){
+  for (int i =0; i<*la; i++){
+    MB[i* (*lab)+1] = AB[i * (*lab) + 1];
+  }
+  
+
+}
+
+void extract_MB_gauss_seidel_tridiag(double *AB, double *MB, int *lab, int *la,int *ku, int*kl, int *kv){
+  for (int i=0; i<*la; i++){
+    MB[*lab * i +1] = AB[i * (*lab) + 1];
+    MB[*lab * i + 2] = AB[i*(*lab)+2];
+  }
+}
+
+
+
+
+void richardson_MB(double *AB, double *RHS, double *X, double *MB, int *lab, int *la,int *ku, int*kl, double *tol, int *maxit, double *resvec, int *nbite) {
+  double* rk = malloc(sizeof(double) * (*la));
+  double norm_B = cblas_dnrm2(*la, RHS, 1); // L2 norm
+  double inv_norm = 1 / norm_B;
+  double norm = 0.0;
+  int* ipiv = malloc(sizeof(int) * (*la)); // Pivots
+  int info = 0;// 0->success
+  int NHRS = 1; // Right-hand sides
+  int kuu = (*ku)-1;
+
+
+
+  dgbtrf_(la, la, kl, &kuu, MB, lab, ipiv, &info);
+  for ((*nbite) = 0; (*nbite) < (*maxit); (*nbite)++) {
+
+    for (int i = 0; i < (*la); i++) {
+      rk[i] = RHS[i];
+    }
+
+    cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, -1.0, AB, *lab, X, 1, 1.0, rk, 1);
+
+    norm = cblas_dnrm2(*la, rk, 1) * inv_norm;
+    resvec[(*nbite)] = norm;
+
+    dgbtrs_("N", la, kl, &kuu, &NHRS, MB, lab, ipiv, rk, la, &info, 1);
+
+    cblas_daxpy(*la, 1, rk, 1, X, 1);
+
+    if (norm <= (*tol))
+      break;
+  }
+
+  free(rk);
+  free(ipiv);
+
+}
+
