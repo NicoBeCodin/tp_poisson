@@ -106,6 +106,8 @@ int main(int argc, char *argv[])
   /* Richardson General Tridiag */
 
   /* get MB (:=M, D for Jacobi, (D-E) for Gauss-seidel) */
+
+
   kv = 1;
   ku = 1;
   kl = 1;
@@ -123,24 +125,33 @@ int main(int argc, char *argv[])
     richardson_MB(AB, RHS, SOL, MB, &lab, &la, &ku, &kl, &tol, &maxit, resvec,
                   &nbite);
     end = clock();
-    printf("Time for jacobi method in cpu ticks: %lf\n", (double)(end - start));
+    char* implem = "";
+    if (IMPLEM==JAC){
+      implem ="jacobi";
+    } else {
+      implem = "gauss-seidel";
+    }
+
+    printf("Time for %s method in cpu ticks: %lf\n",implem, (double)(end - start));
   }
 
   //Debugging 
-  printf("\nIMPLEM = %d\n", IMPLEM);
-  printf("MB matrix:\n");
-  for (int i = 0; i < la; i++) {
-    for (int j = 0; j < lab; j++) {
-      printf("%lf ", MB[i * lab + j]);
-    }
-    printf("\n");
-  }
+  // printf("\nIMPLEM = %d\n", IMPLEM);
+  // printf("MB matrix:\n");
+  // for (int i = 0; i < la; i++) {
+  //   for (int j = 0; j < lab; j++) {
+  //     printf("%lf ", MB[i * lab + j]);
+  //   }
+  //   printf("\n");
+  // }
 
   /* Write solution */
   write_vec(SOL, &la, "SOL.dat");
 
   /* Write convergence history */
+  //Can't understand why SOL.dat is different between ALPHA and JAC method but resvec is exactly the same...
   write_vec(resvec, &nbite, "RESVEC.dat");
+
 
   free(resvec);
   free(RHS);

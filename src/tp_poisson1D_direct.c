@@ -81,7 +81,7 @@ int main(int argc,char *argv[])
   //On utilise dnrm2 pour calculer la norme du vecteur
   double norm_2 = cblas_dnrm2(la, RHS, 1);
   //Puisque t0 = -5 et t1 = 5, la norme est sensé tendre vers 0
-  printf("Norm 2 of RHS is : %lf \n", norm_2);
+
 
   printf("Solution with LAPACK\n");
   ipiv = (int *) calloc(la, sizeof(int));

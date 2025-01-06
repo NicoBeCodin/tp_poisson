@@ -6,7 +6,7 @@
 #include "../include/lib_poisson1D.h"
 #include <cblas.h>
 
-//Stockage GB en priorité colonne pour la mtrice de poisson 1D
+//Stockage GB en priorité colonne pour la matrice de poisson 1D
 void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv){
   int i, j,k;
   for(j=0;j<(*la); j++){
@@ -109,63 +109,30 @@ double richardson_alpha_opt(int *la){
   return 2.0/(eigmin_poisson1D(la) + eigmax_poisson1D(la));
 }
 
-// void richardson_alpha(double *AB, double *RHS, double *X, double *alpha_rich, int *lab, int *la,int *ku, int*kl, double *tol, int *maxit, double *resvec, int *nbite){
-//   double* V = (double*)calloc(*la, sizeof(double));
-//   const double normb = (1/cblas_dnrm2(*la, RHS, 1));
-
-//   //Copie du vecteur V
-//   cblas_dcopy(*la, RHS, 1.0, V, 1.0);
-//   cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, -1.0, AB, *lab, X, 1.0, 1.0,V,1.0);
-//   //residu
-
-//   double residu = cblas_dnrm2(*la, V,1)/ normb;
-//   resvec[*nbite] = residu;
-
-//   while (residu> *tol && *maxit > *nbite){
-//     cblas_daxpy(*la, *alpha_rich, V, 1.0,X,1.0);
-//     //residu
-//     cblas_dcopy(*la, RHS, 1.0, V, 1.0);
-//     cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, -1.0, AB, *lab, X, 1.0, 1.0, V, 1.0);
-
-//     resvec[*nbite] =residu;
-//     residu = cblas_dnrm2(*la, V, 1)* normb;
-//     ++*nbite;
-//   }
-//   free(V);
-
-// }
 
 void richardson_alpha(double *AB, double *RHS, double *X, double *alpha_rich,
                       int *lab, int *la, int *ku, int *kl, double *tol,
                       int *maxit, double *resvec, int *nbite) {
-    /*
-    Richardson method with optimal alpha:
-      r^0 = b - Ax^0
-      while ||r^k+1|| > epsilon do:
-        x^k+1 = x^k + alpha(b - Ax^k)
-    */
 
-    // Allocate memory for residual vector
+
     double *b = (double *)calloc(*la, sizeof(double));
     double norm_b = cblas_dnrm2(*la, RHS, 1); // Compute ||b||_2
 
-    // Compute the initial residual: r^0 = b - Ax^0
     memcpy(b, RHS, *la * sizeof(double));
     cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, -1.0, AB, *lab, X, 1, 1.0, b, 1);
 
-    // Compute the initial residual norm and store it in resvec
+
     resvec[0] = cblas_dnrm2(*la, b, 1) / norm_b;
 
-    // Iterative loop
+
     while (resvec[*nbite] > *tol && *nbite < *maxit) {
-        // Update the solution: x^k+1 = x^k + alpha * r^k
+
         cblas_daxpy(*la, *alpha_rich, b, 1, X, 1);
 
-        // Compute the next residual: r^k+1 = b - Ax^k+1
+
         memcpy(b, RHS, *la * sizeof(double));
         cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, -1.0, AB, *lab, X, 1, 1.0, b, 1);
 
-        // Compute the residual norm and store it in resvec
         (*nbite)++;
         resvec[*nbite] = cblas_dnrm2(*la, b, 1) / norm_b;
     }
@@ -175,13 +142,19 @@ void richardson_alpha(double *AB, double *RHS, double *X, double *alpha_rich,
 }
 
 
-void extract_MB_jacobi_tridiag(double *AB, double *MB, int *lab, int *la,int *ku, int*kl, int *kv){
-  for (int i =0; i<*la; i++){
-    MB[i* (*lab)+1] = AB[i * (*lab) + 1];
-  }
-  
 
+void extract_MB_jacobi_tridiag(double *AB, double *MB, int *lab, int *la,int *ku, int*kl, int *kv) {
+  for (int i = 0; i < *la; i++) {
+    for (int j = 0; j < *lab; j++) {
+      int ind = (*lab)*i;
+      MB[ind + j] = 0.0;
+    }
+    // Fill the diagonal
+    int ind = ((*lab)*i) + (*ku);
+    MB[ind] = AB[ind];
+  }
 }
+
 
 void extract_MB_gauss_seidel_tridiag(double *AB, double *MB, int *lab, int *la,int *ku, int*kl, int *kv){
   for (int i=0; i<*la; i++){
@@ -189,8 +162,6 @@ void extract_MB_gauss_seidel_tridiag(double *AB, double *MB, int *lab, int *la,i
     MB[*lab * i + 2] = AB[i*(*lab)+2];
   }
 }
-
-
 
 
 void richardson_MB(double *AB, double *RHS, double *X, double *MB, int *lab, int *la,int *ku, int*kl, double *tol, int *maxit, double *resvec, int *nbite) {
@@ -229,4 +200,3 @@ void richardson_MB(double *AB, double *RHS, double *X, double *MB, int *lab, int
   free(ipiv);
 
 }
-

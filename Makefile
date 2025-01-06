@@ -84,7 +84,7 @@ run_tpPoisson1D_iter:
 	bin/tpPoisson1D_iter $(ARGS)
 
 run_tpPoisson1D_direct:
-	bin/tpPoisson1D_direct
+	bin/tpPoisson1D_direct $(ARGS)
 
 run_test_csr_csc:
 	bin/test_csr_csc

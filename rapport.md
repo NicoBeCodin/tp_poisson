@@ -88,6 +88,7 @@ effectué une opération matrice-vecteur avec dgbmv et obtenu la solution du sys
 | `dcsrmv`                            | \( O(N) \)                | \( O(N) \)                | Bonne                 | Produit matrice-vecteur au format CSR, stable numériquement grâce à des opérations simples.                |
 | `dcscmv`                            | \( O(N) \)                | \( O(N) \)                | Bonne                 | Produit matrice-vecteur au format CSC, stable numériquement et efficace pour les matrices creuses.         |
 
+
 ---
 
 ### Justifications des choix
@@ -95,6 +96,8 @@ effectué une opération matrice-vecteur avec dgbmv et obtenu la solution du sys
 1. **Complexité temporelle**:
    - Les fonctions qui parcourent une grille ou une matrice ont \( O(la) \).
    - Les fonctions de calcul élémentaire (comme des opérations scalaires) ont \( O(1) \).
+   - Les méthodes directes de la bibliotheques lapacke ont \( O(n^3) \)
+   - Méthodes itératives : \( O(k \cdot n) \) où \( k \) est le nombre d'itérations.
    - Les fonctions itératives dépendent du nombre d'itérations \( k \), d'où \( O(k \cdot la) \).
    - `dcsrmv` et `dcscmv` réalisent des produits matrice-vecteur, chaque entrée non nulle de la matrice étant multipliée et accumulée, d'où \( O(N) \).
 
@@ -107,3 +110,55 @@ effectué une opération matrice-vecteur avec dgbmv et obtenu la solution du sys
    - Les fonctions de configuration de matrices ou vecteurs (e.g., `set_` fonctions) sont stables, car elles manipulent des données déterministes.
    - Les calculs itératifs (comme `richardson_alpha`) sont sensibles aux erreurs d'arrondi et aux mauvais choix de paramètres (\( \alpha \)).
    - Les erreurs relatives (`relative_forward_error`) dépendent de la précision des données et de l'échelle des erreurs, donc leur qualité peut varier.
+
+
+---
+---
+
+## Résultats et Convergence
+
+### Graphes de convergence
+
+Les images suivantes montrent la convergence des méthodes en fonction des itérations :
+
+#### Méthode de Richardson (alpha)
+![Convergence Richardson (alpha)](resvec_iter_0.png)
+
+- ~30 cycles cpu avec les paramètres par défaut
+
+#### Méthode de Jacobi
+![Convergence Jacobi](resvec_iter_1.png)
+
+- ~100 cyles cpu avec les paramètres par défaut
+
+#### Méthode de Gauss-Seidel
+![Convergence Gauss-Seidel](resvec_iter_2.png)
+
+- ~80 cycles cpu avec les paramètres par défaut
+---
+
+### Comparaison des méthodes utilisées
+
+Trois méthodes itératives ont été utilisées :
+- **Richardson (alpha)** : Méthode simple basée sur un paramètre optimal.
+- **Jacobi** : Méthode basée sur une matrice diagonale préconditionnée.
+- **Gauss-Seidel** : Méthode basée sur une précondition \( (D-E) \), converge plus rapidement que Jacobi pour les matrices diagonales dominantes.
+
+
+### Méthodes directes et itératives
+
+| **Méthode**        | **Avantages**                                                                 | **Inconvénients**                                                                                         |
+|---------------------|------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| Méthodes Directes  | - Précision élevée<br>- Convient pour les matrices denses<br>- Résolution exacte | - Complexité temporelle élevée \(O(n^3)\)<br>- Consomme beaucoup de mémoire                                                                   |
+| Méthodes Itératives | - Scalabilité pour les matrices creuses<br>- Complexité temporelle \(O(k \cdot n)\) | - Convergence dépendante de la condition de la matrice<br>- Sensibles aux erreurs d'arrondi pour certaines configurations |
+
+
+
+## Conclusion
+
+1. Les méthodes itératives comme Jacobi et Gauss-Seidel sont bien adaptées aux grandes matrices creuses.
+2. Gauss-Seidel est généralement plus performant que Jacobi en termes de convergence.
+3. La méthode de Richardson peut être utilisée comme point de départ pour comprendre les méthodes itératives.
+
+
+

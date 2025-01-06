@@ -70,7 +70,7 @@ void dcsrmv(int N, double *values, int *col_indices, int *row_ptr, double *x,
 void dcscmv(int N, double *values, int *row_indices, int *col_ptr, double *x,
             double *y) {
   for (int i = 0; i < N; i++) {
-    y[i] = 0.0; // Initialize y
+    y[i] = 0.0;
   }
   for (int j = 0; j < N; j++) {
     for (int k = col_ptr[j]; k < col_ptr[j + 1]; k++) {
