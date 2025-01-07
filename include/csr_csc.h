@@ -15,4 +15,15 @@ void dcsrmv(int N, double *values, int *col_indices, int *row_ptr, double *x, do
 // Function to perform matrix-vector multiplication in CSC format
 void dcscmv(int N, double *values, int *row_indices, int *col_ptr, double *x, double *y);
 
+// Function to perform Richardson iteration using CSR matrix format
+void richardson_alpha_csr(int N, double *values, int *col_indices, int *row_ptr, 
+                          double *RHS, double *SOL, double *alpha_rich, 
+                          double *tol, int *maxit, double *resvec, int *nbite);
+
+// Function to perform Richardson iteration using CSC matrix format
+void richardson_alpha_csc(int N, double *values, int *row_indices, int *col_ptr, 
+                          double *RHS, double *SOL, double *alpha_rich, 
+                          double *tol, int *maxit, double *resvec, int *nbite);
+
+
 #endif // CSR_CSC_H

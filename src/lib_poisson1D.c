@@ -137,7 +137,6 @@ void richardson_alpha(double *AB, double *RHS, double *X, double *alpha_rich,
         resvec[*nbite] = cblas_dnrm2(*la, b, 1) / norm_b;
     }
 
-    // Free allocated memory
     free(b);
 }
 

@@ -4,7 +4,6 @@
 /* to solve the Poisson 1D problem        */
 /******************************************/
 #include "../include/lib_poisson1D.h"
-// #include "lib_poisson1D_richardson.c"
 #include "lib_poisson1D_writers.c"
 #include <time.h>
 
