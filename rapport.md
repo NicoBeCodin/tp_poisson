@@ -315,5 +315,39 @@ Trois méthodes itératives ont été utilisées :
 2. Gauss-Seidel est généralement plus performant que Jacobi en termes de convergence.
 3. La méthode de Richardson peut être utilisée comme point de départ pour comprendre les méthodes itératives.
 
+--- 
 
+### **Implémentation des formats CSR et CSC**
 
+J'ai implémenté avec succès les formats **Compressed Sparse Row (CSR)** et **Compressed Sparse Column (CSC)** pour le stockage des matrices creuses, ainsi que les fonctions de multiplication matrice-vecteur :
+- **`dcsrmv()`** : Multiplication pour le format CSR.
+- **`dcscmv()`** : Multiplication pour le format CSC.
+
+Ces fonctions ont été testées et validées via la commande :
+```bash
+make run_test_csr_csc
+```
+Les résultats montrent que le stockage et les multiplications fonctionnent correctement.
+
+---
+
+### **Méthode de Richardson**
+
+#### **Statut actuel**
+Les méthodes itératives Richardson, **`richardson_alpha_csr()`** et **`richardson_alpha_csc()`**, ont été implémentées mais présentent des erreurs :
+- La norme initiale du résidu est mal calculée ou manipulée, entraînant un arrêt prématuré (0 itérations).
+- Ces implémentations nécessitent encore des ajustements.
+
+#### **Commandes**
+Le programme est exécutable avec :
+```bash
+make run_test_csr_csc
+```
+Cette commande montre :
+1. Le succès des formats CSR/CSC et des multiplications.
+2. Les limitations actuelles des méthodes Richardson.
+
+---
+
+### **Conclusion**
+L’implémentation des formats CSR et CSC est opérationnelle. Les bases pour les solveurs Richardson sont en place mais nécessitent des corrections pour garantir leur fonctionnement.
