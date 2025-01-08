@@ -37,7 +37,3 @@ Here:
 $ make run_testenv
 $ make run_tpPoisson1D_iter
 $ make run_tpPoisson1D_direct
-$ make run_test_csr_csc
-
-run_test_csr_csc has a working storage solution for csr and csc matrices, dcsrmv and dcscmv are the 
-matrix-vector implementation for those storage solutions, the rest is a working in progress...
