@@ -79,40 +79,48 @@ void dcscmv(int N, double *values, int *row_indices, int *col_ptr, double *x,
   }
 }
 
+
+// /*The following functions are a work in progress*/
+
 void richardson_alpha_csr(int N, double *values, int *col_indices, int *row_ptr,
                           double *RHS, double *X, double *alpha_rich,
                           double *tol, int *maxit, double *resvec, int *nbite) {
+    double *b = (double *)calloc(N, sizeof(double));
+    double norm_b = cblas_dnrm2(N, RHS, 1); // Compute ||b||_2
+    printf("Computed RHS norm: %lf\n", norm_b);
 
-  printf("Initial Residual (CSR): %lf\n", resvec[0]);
-  for (int i = 0; i < nbite; i++) {
-    printf("Iteration %d, Residual: %lf\n", i, resvec[i]);
-  }
-  double *b = (double *)calloc(N, sizeof(double));
-  double norm_b = cblas_dnrm2(N, RHS, 1); // Compute ||b||_2
-
-  memcpy(b, RHS, N * sizeof(double));
-  dcsrmv(N, values, col_indices, row_ptr, X, b); // b = b - Ax
-  for (int i = 0; i < N; i++) {
-    b[i] = RHS[i] - b[i];
-  }
-
-  resvec[0] = cblas_dnrm2(N, b, 1) / norm_b;
-
-  while (resvec[*nbite] > *tol && *nbite < *maxit) {
-    cblas_daxpy(N, *alpha_rich, b, 1, X, 1); // X = X + alpha_rich * b
-
-    memcpy(b, RHS, N * sizeof(double));
-    dcsrmv(N, values, col_indices, row_ptr, X, b); // b = b - Ax
-    for (int i = 0; i < N; i++) {
-      b[i] = RHS[i] - b[i];
+    if (norm_b == 0.0) {
+        printf("RHS norm is zero. Exiting Richardson method.\n");
+        free(b);
+        return;
     }
 
-    (*nbite)++;
-    resvec[*nbite] = cblas_dnrm2(N, b, 1) / norm_b;
-  }
+    memcpy(b, RHS, N * sizeof(double));
+    dcsrmv(N, values, col_indices, row_ptr, X, b);
+    for (int i = 0; i < N; i++) {
+        b[i] = RHS[i] - b[i];
+    }
 
-  free(b);
+    resvec[0] = cblas_dnrm2(N, b, 1) / norm_b;
+    printf("Initial Residual: %lf\n", resvec[0]);
+
+    while (resvec[*nbite] > *tol && *nbite < *maxit) {
+        cblas_daxpy(N, *alpha_rich, b, 1, X, 1); // X = X + alpha_rich * b
+
+        memcpy(b, RHS, N * sizeof(double));
+        dcsrmv(N, values, col_indices, row_ptr, X, b);
+        for (int i = 0; i < N; i++) {
+            b[i] = RHS[i] - b[i];
+        }
+
+        (*nbite)++;
+        resvec[*nbite] = cblas_dnrm2(N, b, 1) / norm_b;
+    }
+
+    free(b);
 }
+
+
 
 void richardson_alpha_csc(int N, double *values, int *row_indices, int *col_ptr,
                           double *RHS, double *X, double *alpha_rich,
@@ -194,6 +202,7 @@ void richardson_MB_csc(int N, double *AB_values, int *AB_row_indices,
     if (norm <= (*tol)) {
       break;
     }
+    
 
     dcscmv(N, MB_values, MB_row_indices, MB_col_ptr, rk, rk);
     cblas_daxpy(N, 1.0, rk, 1, X, 1); // X = X + rk
